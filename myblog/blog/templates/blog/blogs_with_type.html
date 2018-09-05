@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{# 页面标题 #}
+{% block title %}
+    {{ blog_type.type_name }}
+{% endblock %}
+
+{# 页面内容 #}
+{% block content %}
+    {{ blog_type.type_name }}
+    {% for blog in blogs %}
+        <h3>{{ blog.title }}</h3>
+        <p>{{ blog.content|truncatechars:30 }}</p>
+    {% endfor %}
+{% endblock %}
