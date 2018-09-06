@@ -53,13 +53,19 @@ def blog_list(request):
 def blog_detail(request, blog_pk):
     # 当前博客
     blog = get_object_or_404(Blog, pk=blog_pk)
+    if not request.COOKIES.get('blog_%s_read' % blog_pk):
+        blog.read_num += 1
+        blog.save()
+
     context = {}
     context['blog'] = blog
     # 当前博客的上一条博客
     context['previous_blog'] = Blog.objects.filter(created_time__gt=blog.created_time).last()
     # 当前博客的下一条博客
     context['next_blog'] = Blog.objects.filter(created_time__lt=blog.created_time).first()
-    return render(request, 'blog/blog_detail.html', context)
+    response = render(request, 'blog/blog_detail.html', context)
+    response.set_cookie('blog_%s_read' % blog_pk, 'true')
+    return response
 
 # 根据分类查询博客
 def blogs_with_type(request, blog_type_pk):
