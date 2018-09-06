@@ -1,25 +1,82 @@
 from django.shortcuts import render, get_object_or_404
+from django.core.paginator import Paginator
+from django.conf import settings
+from django.db.models import Count
 from .models import Blog, BlogType
 
-# Create your views here.
+# 分页
+def get_blog_list_common_data(request, blogs_all_list):
+    paginator = Paginator(blogs_all_list, settings.EACH_PAGE_BLOGS_NUMBER)  # 每页显示10条
+    page_num = request.GET.get('page', 1)  # 获取页码参数(GET请求)
+    page_of_blogs = paginator.get_page(page_num)  # 获取当前页博客
+    current_page_num = page_of_blogs.number  # 获取当前页
+    # 获取当前页前后各两页，即5页
+    page_range = [i for i in range(max(current_page_num - 2, 1), min(current_page_num + 2, paginator.num_pages) + 1)]
+    # 加上省略页码标记
+    if page_range[0] - 1 >= 2:
+        page_range.insert(0, '...')
+    if paginator.num_pages - page_range[-1] >= 2:
+        page_range.append('...')
+    # 加上首页和尾页
+    if page_range[0] != 1:
+        page_range.insert(0, 1)
+    if page_range[-1] != paginator.num_pages:
+        page_range.append(paginator.num_pages)
+
+    # 获取日期归档对应的博客数量
+    blog_dates = Blog.objects.dates('created_time', 'month', order='DESC')
+    blog_dates_dict = {}
+    for blog_date in blog_dates:
+        blog_count = Blog.objects.filter(created_time__year=blog_date.year,
+                                         created_time__month=blog_date.month).count()
+        blog_dates_dict[blog_date] = blog_count
+
+    context = {}
+    # context['blogs'] = blogs_all_list 等价于 page_of_blogs.object_list
+    # 分页显示的博客信息
+    context['page_of_blogs'] = page_of_blogs
+    # 分页页码
+    context['page_range'] = page_range
+    # 博客类型分类    拓展一个字段来存储分类博客数量
+    context['blog_types'] = BlogType.objects.annotate(blog_count=Count('blog'))
+    # 博客日期归档
+    context['blog_dates'] = blog_dates_dict
+    return context
+
 # 博客列表页
 def blog_list(request):
-    context = {}
-    context['blogs'] = Blog.objects.all()
-    context['blog_types'] = BlogType.objects.all()
+    blogs_all_list = Blog.objects.all()# 获取所有博客
+    context = get_blog_list_common_data(request, blogs_all_list)
     return render(request, 'blog/blog_list.html', context)
 
 # 博客详情页
 def blog_detail(request, blog_pk):
+    # 当前博客
+    blog = get_object_or_404(Blog, pk=blog_pk)
     context = {}
-    context['blog'] = get_object_or_404(Blog, pk=blog_pk)
+    context['blog'] = blog
+    # 当前博客的上一条博客
+    context['previous_blog'] = Blog.objects.filter(created_time__gt=blog.created_time).last()
+    # 当前博客的下一条博客
+    context['next_blog'] = Blog.objects.filter(created_time__lt=blog.created_time).first()
     return render(request, 'blog/blog_detail.html', context)
 
 # 根据分类查询博客
-def blogs_with_type(request, blogs_with_type):
-    context = {}
-    blog_type = get_object_or_404(BlogType, pk=blogs_with_type)
+def blogs_with_type(request, blog_type_pk):
+    # 获取博客类型
+    blog_type = get_object_or_404(BlogType, pk=blog_type_pk)
+    # 根据博客类型获取博客文章
+    blogs_all_list = Blog.objects.filter(blog_type=blog_type)
+    context = get_blog_list_common_data(request, blogs_all_list)
+    # 博客类型
     context['blog_type'] = blog_type
-    context['blogs'] = Blog.objects.filter(blog_type=blog_type)
-    context['blog_types'] = BlogType.objects.all()
     return render(request, 'blog/blogs_with_type.html', context)
+
+# 根据年份月份分类查询
+def blogs_with_date(request, year, month):
+    # 获取某一月份的所有博客
+    blogs_all_list = Blog.objects.filter(created_time__year=year, created_time__month=month)
+    context = get_blog_list_common_data(request, blogs_all_list)
+    # 博客日期
+    context['blogs_with_date'] = "%s年%s月" % (year, month)
+    return render(request, 'blog/blogs_with_date.html', context)

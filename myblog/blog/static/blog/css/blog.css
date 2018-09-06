@@ -1,6 +1,3 @@
-ul.blog-types {
-    list-style-type: none;
-}
 div.blog:not(:last-child) {
     margin-bottom: 2em;
     padding-bottom: 1em;
@@ -8,6 +5,18 @@ div.blog:not(:last-child) {
 }
 div.blog h3 {
     margin-top: 0.5em;
+}
+div.blog p.blog-info {
+    margin-bottom: 0;
+}
+div.blog p.blog-info span.tag-type {
+    margin-right: 5px;
+}
+div.blog p.blog-info a.blog-type {
+    margin-right: 10px;
+}
+div.paginator {
+    text-align: center;
 }
 ul.blog-info-description {
     list-style-type: none;

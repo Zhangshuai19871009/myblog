@@ -14,7 +14,10 @@ class Blog(models.Model):
     content = models.TextField(verbose_name='内容')
     author = models.ForeignKey(User, verbose_name='作者', on_delete=models.CASCADE)
     created_time = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
-    last_update_time = models.DateTimeField(verbose_name='最后修改时间', auto_now=True)
+    last_updated_time = models.DateTimeField(verbose_name='最后修改时间', auto_now=True)
 
     def __str__(self):
         return "<Blog: %s>" % self.title
+
+    class Meta:
+        ordering = ['-created_time']
