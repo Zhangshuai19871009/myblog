@@ -3,6 +3,7 @@ from django.core.paginator import Paginator
 from django.conf import settings
 from django.db.models import Count
 from .models import Blog, BlogType
+from read_statistics.utils import read_statistics_once_read
 
 # 分页
 def get_blog_list_common_data(request, blogs_all_list):
@@ -49,24 +50,6 @@ def blog_list(request):
     context = get_blog_list_common_data(request, blogs_all_list)
     return render(request, 'blog/blog_list.html', context)
 
-# 博客详情页
-def blog_detail(request, blog_pk):
-    # 当前博客
-    blog = get_object_or_404(Blog, pk=blog_pk)
-    if not request.COOKIES.get('blog_%s_read' % blog_pk):
-        blog.read_num += 1
-        blog.save()
-
-    context = {}
-    context['blog'] = blog
-    # 当前博客的上一条博客
-    context['previous_blog'] = Blog.objects.filter(created_time__gt=blog.created_time).last()
-    # 当前博客的下一条博客
-    context['next_blog'] = Blog.objects.filter(created_time__lt=blog.created_time).first()
-    response = render(request, 'blog/blog_detail.html', context)
-    response.set_cookie('blog_%s_read' % blog_pk, 'true')
-    return response
-
 # 根据分类查询博客
 def blogs_with_type(request, blog_type_pk):
     # 获取博客类型
@@ -86,3 +69,19 @@ def blogs_with_date(request, year, month):
     # 博客日期
     context['blogs_with_date'] = "%s年%s月" % (year, month)
     return render(request, 'blog/blogs_with_date.html', context)
+
+# 博客详情页
+def blog_detail(request, blog_pk):
+    # 当前博客
+    blog = get_object_or_404(Blog, pk=blog_pk)
+    read_cookie_key = read_statistics_once_read(request, blog)
+
+    context = {}
+    context['blog'] = blog
+    # 当前博客的上一条博客
+    context['previous_blog'] = Blog.objects.filter(created_time__gt=blog.created_time).last()
+    # 当前博客的下一条博客
+    context['next_blog'] = Blog.objects.filter(created_time__lt=blog.created_time).first()
+    response = render(request, 'blog/blog_detail.html', context)
+    response.set_cookie(read_cookie_key, 'true') # 阅读 cookie标记
+    return response
