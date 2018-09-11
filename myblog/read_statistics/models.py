@@ -8,8 +8,8 @@ from django.utils import timezone
 class ReadNum(models.Model):
     read_num = models.IntegerField(verbose_name='阅读总数', default=0)
 
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
+    content_type = models.ForeignKey(ContentType, verbose_name='对象', on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField(verbose_name='ID')
     content_object = GenericForeignKey('content_type', 'object_id')
 
 # 阅读数统计
@@ -27,6 +27,6 @@ class ReadDetail(models.Model):
     date = models.DateField(verbose_name='阅读日期', default=timezone.now())
     read_num = models.IntegerField(verbose_name='阅读数', default=0)
 
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
+    content_type = models.ForeignKey(ContentType, verbose_name='对象', on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField(verbose_name='ID')
     content_object = GenericForeignKey('content_type', 'object_id')

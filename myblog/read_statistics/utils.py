@@ -32,3 +32,20 @@ def get_seven_days_read_data(content_type):
         result = read_detals.aggregate(read_num_sum=Sum('read_num'))
         read_nums.append(result['read_num_sum'] or 0)
     return dates, read_nums
+
+# 获取当天热门博客
+def get_today_hot_data(content_type):
+    today = timezone.now().date()
+    read_details = ReadDetail.objects.\
+                    filter(content_type=content_type, date=today).\
+                    order_by('-read_num')
+    return read_details[:7]
+
+# 获取昨天热门博客
+def get_yesterday_hot_data(content_type):
+    today = timezone.now().date()
+    yesterday = today - datetime.timedelta(days=1)
+    read_details = ReadDetail.objects.\
+                    filter(content_type=content_type, date=yesterday).\
+                    order_by('-read_num')
+    return read_details[:7]
