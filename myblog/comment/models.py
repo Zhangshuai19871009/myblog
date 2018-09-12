@@ -12,3 +12,6 @@ class Comment(models.Model):
     text = models.TextField(verbose_name='评论内容')
     comment_time = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, verbose_name='评论人', on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ['-comment_time']
