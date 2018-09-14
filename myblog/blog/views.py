@@ -2,12 +2,9 @@ from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator
 from django.conf import settings
 from django.db.models import Count
-from django.contrib.contenttypes.models import ContentType
 
 from .models import Blog, BlogType
 from read_statistics.utils import read_statistics_once_read
-from comment.models import Comment
-from comment.forms import CommentForm
 
 # 分页
 def get_blog_list_common_data(request, blogs_all_list):
@@ -80,13 +77,9 @@ def blog_detail(request, blog_pk):
     # 当前博客
     blog = get_object_or_404(Blog, pk=blog_pk)
     read_cookie_key = read_statistics_once_read(request, blog)
-    blog_content_type = ContentType.objects.get_for_model(blog)
-    comments = Comment.objects.filter(content_type=blog_content_type, object_id=blog.pk, root=None)
 
     context = {}
     context['blog'] = blog
-    context['comments'] = comments.order_by('-comment_time')
-    context['comment_form'] = CommentForm(initial={'content_type': blog_content_type.model, 'object_id': blog_pk, 'reply_comment_id': 0})
     # 当前博客的上一条博客
     context['previous_blog'] = Blog.objects.filter(created_time__gt=blog.created_time).last()
     # 当前博客的下一条博客

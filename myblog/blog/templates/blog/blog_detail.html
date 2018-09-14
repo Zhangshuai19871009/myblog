@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
+{% load comment_tags %}
+{% load read_tags %}
 
 {# 页面标题 #}
 {% block title %}
@@ -23,7 +25,8 @@
                     <li>作者：{{ blog.author }}</li>
                     <li>分类：<a href="{% url 'blogs_with_type' blog.blog_type.pk %}">{{ blog.blog_type }}</a></li>
                     <li>发表日期：{{ blog.created_time|date:'Y-m-d H:i:s' }}</li>
-                    <li>阅读 ({{ blog.get_read_num }})</li>
+                    <li>阅读 ({% get_read_num blog %})</li>
+                    <li>评论 ({% get_comment_count blog %})</li>
                 </ul>
                 <div class="blog-content">{{ blog.content|safe }}</div>
                 <div class="blog-more">
@@ -44,10 +47,11 @@
                         <form id="comment_form" action="{% url 'update_comment' %}" method="post" style="overflow: hidden">
                             <label for="comment_text">{{ user.username }}，欢迎评论~</label>
                             <div id="reply_content_container" style="display: none;">
-                                <p>回复：</p>
+                                <p id="reply_title">回复：</p>
                                 <div id="reply_content"></div>
                             </div>
                             {% csrf_token %}
+                            {% get_comment_form blog as comment_form %}
                             {% for field in comment_form %}
                                 {{ field }}
                             {% endfor %}
@@ -64,6 +68,7 @@
                 <div class="comment-area">
                     <h3 class="comment-area-title">评论列表</h3>
                     <div id="comment-list">
+                        {% get_comment_list blog as comments %}
                         {% for comment in comments %}
                             <div id="root_{{ comment.pk }}" class="comment">
                                 <span>{{ comment.user.username }}</span>
@@ -97,6 +102,25 @@
 {% endblock %}
 {% block script_extends %}
     <script type="text/javascript">
+        function reply(reply_comment_id) {
+            // 设置隐藏的被回复评论的ID
+            $("#reply_comment_id").val(reply_comment_id);
+            // 在评论框上层显示被回复的内容
+            var html = $("#comment_" + reply_comment_id).html();
+            $("#reply_content").html(html);
+            // 显示被回复的内容
+            $("#reply_content_container").show();
+            // 点击回复300毫秒后页面回调到评论框
+            $("html").animate(
+                {
+                    scrollTop: $("#comment_form").offset().top - 60
+                },
+                300,
+                function () {
+                    CKEDITOR.instances['id_text'].focus();
+                }
+            );
+        }
         $("#comment_form").submit(function () {
             // 清除错误信息
             $("#comment-error").text('');
@@ -123,7 +147,7 @@
                             // 插入评论
                             var comment_html = '<div id="root_' + data['pk'] + '" class="comment">' +
                                                 '<span>' + data['username'] + '</span>' +
-                                                '<span>(' + data['comment_time'] + '):</span>' +
+                                                '<span>(' + timeFormat(data['comment_time']) + '):</span>' +
                                                 '<div id="comment_' + data['pk'] + '">' +
                                                     data['text'] +
                                                 '</div>' +
@@ -134,7 +158,7 @@
                             // 插入回复
                             var reply_html = '<div class="reply">' +
                                                 '<span>' + data['username'] + '</span>' +
-                                                '<span>(' + data['comment_time'] + ')</span>' +
+                                                '<span>(' + timeFormat(data['comment_time']) + ')</span>' +
                                                 '<span>回复</span>'+
                                                 '<span>' + data['reply_to'] + ':</span>' +
                                                 '<div id="comment_' + data['pk'] + '">' +
@@ -149,6 +173,7 @@
                         $("#reply_content_container").hide();
                         $("#reply_comment_id").val('0');
                         $("#no_comment").remove();
+                        $("#comment-error").text('评论成功！')
                     } else {
                         // 显示错误信息
                         $("#comment-error").prepend(data['message'])
@@ -159,25 +184,21 @@
                 }
             });
             return false;
-        })
-        function reply(reply_comment_id) {
-            // 设置隐藏的被回复评论的ID
-            $("#reply_comment_id").val(reply_comment_id);
-            // 在评论框上层显示被回复的内容
-            var html = $("#comment_" + reply_comment_id).html();
-            $("#reply_content").html(html);
-            // 显示被回复的内容
-            $("#reply_content_container").show();
-            // 点击回复300毫秒后页面回调到评论框
-            $("html").animate(
-                {
-                    scrollTop: $("#comment_form").offset().top - 60
-                },
-                300,
-                function () {
-                    CKEDITOR.instances['id_text'].focus();
-                }
-            );
+        });
+        // 格式化数字
+        function numFormat(num) {
+            return ('00' + num).substr(-2);
+        }
+        // 格式化日期
+        function timeFormat (timestamp) {
+            var datetime = new Date(timestamp * 1000);
+            var year = datetime.getFullYear();
+            var month = numFormat(datetime.getMonth() + 1);
+            var day = numFormat(datetime.getDate());
+            var hour = numFormat(datetime.getHours());
+            var minute = numFormat(datetime.getMinutes());
+            var second = numFormat(datetime.getSeconds());
+            return year + '-' + month + '-' + day + '-' + ' ' + hour + ':' + minute + ':' + second;
         }
     </script>
 {% endblock %}

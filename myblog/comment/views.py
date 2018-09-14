@@ -24,7 +24,7 @@ def update_comment(request):
         # 异步提交返回数据
         data['status'] = 'SUCCESS'
         data['username'] = comment.user.username
-        data['comment_time'] = comment.comment_time.strftime('%Y-%m-%d %H:%M:%S')
+        data['comment_time'] = comment.comment_time.timestamp()
         data['text'] = comment.text
         if not parent is None:
             data['reply_to'] = comment.reply_to.username

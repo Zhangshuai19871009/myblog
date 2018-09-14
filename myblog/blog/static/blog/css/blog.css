@@ -24,7 +24,7 @@ ul.blog-info-description {
 }
 ul.blog-info-description li {
     display: inline-block;
-    margin-right: 2em;
+    margin-right: 1em;
 }
 div.blog-content {
     text-indent: 2em;
@@ -50,3 +50,18 @@ div.comment {
 div.reply {
     margin-left: 2em;
 }
+div#reply_content_container {
+    border: 1px solid #d1d1d1;
+    border-bottom: none;
+    background-color: #f8f8f8;
+    overflow: hidden;
+    padding: 1em 1em 0.5em;
+}
+div p#reply_title {
+    border-bottom: 1px dashed #ccc;
+    padding-bottom: 0.5em;
+}
+div#reply_content {
+    text-indent: 3em;
+}
+

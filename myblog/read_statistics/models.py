@@ -12,16 +12,6 @@ class ReadNum(models.Model):
     object_id = models.PositiveIntegerField(verbose_name='ID')
     content_object = GenericForeignKey('content_type', 'object_id')
 
-# 阅读数统计
-class ReadNumExpandMethod():
-    def get_read_num(self):
-        try:
-            ct = ContentType.objects.get_for_model(self)
-            readnum = ReadNum.objects.get(content_type=ct, object_id=self.pk)
-            return readnum.read_num
-        except exceptions.ObjectDoesNotExist:
-            return 0
-
 # 阅读明细
 class ReadDetail(models.Model):
     date = models.DateField(verbose_name='阅读日期', default=timezone.now())
