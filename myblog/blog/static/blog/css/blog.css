@@ -28,6 +28,7 @@ ul.blog-info-description li {
 }
 div.blog-content {
     text-indent: 2em;
+    margin-bottom: 2em;
 }
 div.comment-block {
     margin-bottom: 10em;
@@ -63,5 +64,15 @@ div p#reply_title {
 }
 div#reply_content {
     text-indent: 3em;
+}
+div.like {
+    margin-bottom: 1em;
+    color: #337ab7;
+    cursor: pointer;
+    display: inline-block;
+    padding: 0.5em 0.3em;
+}
+div.like .active {
+    color: #f22;
 }
 
