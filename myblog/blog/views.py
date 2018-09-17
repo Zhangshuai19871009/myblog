@@ -62,7 +62,6 @@ def blogs_with_type(request, blog_type_pk):
     context['blog_type'] = blog_type
     return render(request, 'blog/blogs_with_type.html', context)
 
-
 # 根据年份月份分类查询
 def blogs_with_date(request, year, month):
     # 获取某一月份的所有博客
