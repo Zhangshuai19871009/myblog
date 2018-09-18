@@ -1,5 +1,4 @@
 from django.db import models
-from django.db.models.fields import exceptions
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone

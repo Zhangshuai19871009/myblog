@@ -41,15 +41,10 @@ def home(request):
     if seven_days_hot_blogs is None:
         seven_days_hot_blogs = get_seven_days_hot_blogs()
         cache.set('seven_days_hot_blogs', seven_days_hot_blogs, 3600)
-        print('7 calc')
-    else:
-        print('7 use cache')
+
     if month_hot_blogs is None:
         month_hot_blogs = get_month_hot_blogs()
         cache.set('month_hot_blogs', month_hot_blogs, 3600)
-        print('30 calc')
-    else:
-        print('30 use cache')
 
     context = {}
     context['dates'] = dates
