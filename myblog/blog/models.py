@@ -1,3 +1,4 @@
+from django.shortcuts import reverse
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.fields import GenericRelation
@@ -18,6 +19,14 @@ class Blog(models.Model):
     read_details = GenericRelation(ReadDetail) # 反向泛型关系
     created_time = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
     last_updated_time = models.DateTimeField(verbose_name='最后修改时间', auto_now=True)
+
+    # 反解析，通过对象反解析出对应的url
+    def get_url(self):
+        return reverse('blog_detail', kwargs={'blog_pk': self.pk})
+
+    # 获取当前博客的发布者的email
+    def get_email(self):
+        return self.author.email
 
     def __str__(self):
         return "<Blog: %s>" % self.title

@@ -75,4 +75,9 @@ div.like {
 div.like .active {
     color: #f22;
 }
-
+div.comment-text {
+    margin-left: 1em;
+}
+span.reply-color {
+    color: green;
+}
